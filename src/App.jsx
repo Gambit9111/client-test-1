@@ -1,5 +1,7 @@
 import io from "socket.io-client";
 import { useEffect, useState } from "react";
+import { encrypt_message, decrypt_message } from "./MessageEncrypt";
+
 const socket = io.connect(import.meta.env.VITE_IP);
 
 function App() {
@@ -7,13 +9,16 @@ function App() {
   const [messageReceived, setMessageReceived] = useState("");
 
   const sendMessage = () => {
-    socket.emit("send_message", { message });
+    const encrypted = encrypt_message(message);
+
+    socket.emit("send_message", { message: encrypted });
     setMessage("");
   };
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
-      setMessageReceived(data.message);
+      const decrypted = decrypt_message(data.message);
+      setMessageReceived(decrypted);
     });
   }, [socket]);
   return (
